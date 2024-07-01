@@ -4,15 +4,12 @@
 
 # standard imports
 import argparse
-import dataclasses
 import csv
 import logging
 from typing import Mapping, Sequence, TextIO
 
 
-# global logger
-logger = logging.getLogger("csvh")
-
+# global constants
 DELIMITER_ATTRS = [
     "delimiter",
     "lineterminator",
@@ -20,6 +17,9 @@ DELIMITER_ATTRS = [
     "quotechar",
     "escapechar",
 ]
+
+# global logger
+logger = logging.getLogger("csvh")
 
 
 def log_dialect(log_level: int, dialect: csv.Dialect) -> None:
@@ -49,10 +49,10 @@ def process_csv(
         for i in range(1, num_prolog_lines + 1):
             line = input_file.readline()
             if keep_prolog:
-                logger.debug("keeping prolog line %d / %s : %r", i, num_prolog_lines, line)
+                logger.debug("keeping prolog line %d / %d : %r", i, num_prolog_lines, line)
                 prolog_lines.append(line)
             elif skip_prolog:
-                logger.debug("skipping prolog line %d / %s : %r", i, num_prolog_lines, line)
+                logger.debug("skipping prolog line %d / %d : %r", i, num_prolog_lines, line)
 
     # determine dialect
     logger.debug("dialect in: %r", dialect)
@@ -98,7 +98,7 @@ def process_csv(
 
     # write prolog lines that were kept
     for i, line in enumerate(prolog_lines, start=1):
-        logger.debug("writing prolog line %d / %s : %r", i, num_prolog_lines, line)
+        logger.debug("writing prolog line %d / %d : %r", i, num_prolog_lines, line)
         output_file.write(line)
 
     # read from input-file, write to output-file
