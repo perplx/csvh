@@ -45,18 +45,15 @@ def process_csv(
     num_prolog_lines = max(keep_prolog, skip_prolog)
     if keep_prolog or skip_prolog:
         prolog_lines = []
-        for i in range(num_prolog_lines):
+        for i in range(1, num_prolog_lines + 1):
             line = input_file.readline()
-            logger.debug("keeping prolog line %d / %s : %r", i+1, num_prolog_lines, line)
             if keep_prolog:
+                logger.debug("keeping prolog line %d / %s : %r", i, num_prolog_lines, line)
                 prolog_lines.append(line)
-    elif skip_prolog:
-        for i in range(num_prolog_lines):
-            line = input_file.readline()
-            logger.debug("skipping prolog line %d / %s : %r", i+1, num_prolog_lines, line)
+            elif skip_prolog:
+                logger.debug("skipping prolog line %d / %s : %r", i, num_prolog_lines, line)
 
     # determine dialect
-
     logger.debug("dialect in: %r", dialect)
     if dialect == "sniff":
         start_offset = input_file.tell()
@@ -92,15 +89,17 @@ def process_csv(
     logger.debug("writing to file %s", output_file.name)
 
     # write prolog lines that were kept
-    for i, line in enumerate(prolog_lines):
-        logger.debug("writing prolog line %d / %s : %r", i+1, num_prolog_lines, line)
+    for i, line in enumerate(prolog_lines, start=1):
+        logger.debug("writing prolog line %d / %s : %r", i, num_prolog_lines, line)
         output_file.write(line)
 
     # read from input-file, write to output-file
     csv_writer = csv.DictWriter(output_file, output_columns, dialect=dialect)
     csv_writer.writeheader()
     for input_row in csv_reader:
+        logger.debug("input_row: %s", input_row)  # FIXME use restkey to warn when restkey is set!
         output_row = dict((k, v) for (k, v) in input_row.items() if k in output_columns)
+        logger.debug("output_row: %s", output_row)
         csv_writer.writerow(output_row)
 
 
