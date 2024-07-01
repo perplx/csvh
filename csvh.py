@@ -7,7 +7,7 @@ import argparse
 import dataclasses
 import csv
 import logging
-from typing import Mapping, TextIO
+from typing import Mapping, Sequence, TextIO
 
 
 # global logger
@@ -34,7 +34,8 @@ def process_csv(
         keep_prolog: int,
         skip_prolog: int,
         dialect: str | csv.Dialect,
-        keep_cols: Mapping[str,str],
+        keep_cols: Mapping[str, str],
+        keep_rows: Mapping[str, Sequence[str]]
     ) -> None:
     """Read CSV data from `input_file`, process, write to `output_file`"""
 
@@ -85,6 +86,11 @@ def process_csv(
         output_columns = input_columns
     logger.debug("writing %d columns: %s", len(output_columns), output_columns)
 
+    # if `--keep-rows was given, check the filter for row values`
+    missing_cols = [name for name in keep_rows if name not in input_columns]
+    if missing_cols:
+        raise ValueError(f"Filtering with --keep-rows on missing columns: {missing_cols}")
+
     # prepare to write to output-file
     logger.debug("writing to file %s", output_file.name)
 
@@ -96,8 +102,12 @@ def process_csv(
     # read from input-file, write to output-file
     csv_writer = csv.DictWriter(output_file, output_columns, dialect=dialect)
     csv_writer.writeheader()
-    for input_row in csv_reader:
+    for i, input_row in enumerate(csv_reader, start=1):
         logger.debug("input_row: %s", input_row)  # FIXME use restkey to warn when restkey is set!
+        if any(input_row[name] not in values for (name, values) in keep_rows.items()):
+            logger.debug("skipping input-row row %d : %s because filters not matched", i, input_row)
+            continue
+
         output_row = dict((k, v) for (k, v) in input_row.items() if k in output_columns)
         logger.debug("output_row: %s", output_row)
         csv_writer.writerow(output_row)
@@ -146,13 +156,16 @@ def main():
 
     filter_group = arg_parser.add_argument_group("filter")
     filter_group.add_argument("--keep-cols", type=str, nargs="+", help="list of column-names to keep, in the order to be kept")
+    filter_group.add_argument("--keep-rows", type=str, nargs="+", action="append", default=[])
 
     # read command-line paramerters
     args = arg_parser.parse_args()
 
     # prepare logging
     logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.NOTSET)
+    logger.debug("args: %s", args)
 
+    # read dialect parameters
     if args.sniff:
         logger.debug("sniff")
         dialect = "sniff"
@@ -163,6 +176,10 @@ def main():
         logger.debug("args")
         dialect = dialect_args(args)
 
+    # read `--keep-rows` parameters
+    keep_rows = dict((keep_args[0], keep_args[1:]) for keep_args in args.keep_rows)
+    logger.debug("keep_rows: %s", keep_rows)
+
     process_csv(
         args.input_file,
         args.output_file,
@@ -170,6 +187,7 @@ def main():
         args.skip_prolog,
         dialect,
         args.keep_cols,
+        keep_rows,
     )
 
 
