@@ -61,6 +61,8 @@ def process_csv(
         csv_sniffer = csv.Sniffer()
         dialect: csv.Dialect = csv_sniffer.sniff(input_file.read(1024))
         input_file.seek(start_offset)
+        logger.debug("detected dialect:")
+        log_dialect(logging.DEBUG, dialect)
     elif isinstance(dialect, str):
         if dialect in csv.list_dialects():
             logger.debug("using dialect: %r", dialect)
