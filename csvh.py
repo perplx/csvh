@@ -102,15 +102,30 @@ def process_csv(
     # read from input-file, write to output-file
     csv_writer = csv.DictWriter(output_file, output_columns, dialect=dialect)
     csv_writer.writeheader()
-    for i, input_row in enumerate(csv_reader, start=1):
-        logger.debug("input_row: %s", input_row)  # FIXME use restkey to warn when restkey is set!
-        if any(input_row[name] not in values for (name, values) in keep_rows.items()):
-            logger.debug("skipping input-row row %d : %s because filters not matched", i, input_row)
-            continue
 
-        output_row = dict((k, v) for (k, v) in input_row.items() if k in output_columns)
-        logger.debug("output_row: %s", output_row)
-        csv_writer.writerow(output_row)
+    num_rows_read = 0
+    num_rows_written = 0
+    num_rows_skipped = 0
+    try:
+        for i, input_row in enumerate(csv_reader, start=1):
+            num_rows_read += 1
+            logger.debug("input_row %d: %s", i, input_row)  # FIXME use restkey to warn when restkey is set!
+            if any(input_row[name] not in values for (name, values) in keep_rows.items()):
+                logger.debug("skipping input-row row %d : %s because filters not matched", i, input_row)
+                num_rows_skipped += 1
+            else:
+                output_row = dict((k, v) for (k, v) in input_row.items() if k in output_columns)
+                logger.debug("output_row %d: %s", i, output_row)
+                csv_writer.writerow(output_row)
+                num_rows_written += 1
+    except Exception as e:
+        logger.error(f"error on row {i}: {e}")
+        raise
+    finally:
+        logger.debug("read %d rows", num_rows_read)
+        logger.debug("wrote %d rows", num_rows_written)
+        if num_rows_skipped > 0:
+            logger.debug("skipped %d rows", num_rows_skipped)
 
 
 def dialect_args(args: argparse.Namespace) -> csv.Dialect:
@@ -167,13 +182,12 @@ def main():
 
     # read dialect parameters
     if args.sniff:
-        logger.debug("sniff")
         dialect = "sniff"
+        logger.debug("sniff")
     elif args.dialect:
         dialect = args.dialect
         logger.debug("name %s", dialect)
     else:
-        logger.debug("args")
         dialect = dialect_args(args)
 
     # read `--keep-rows` parameters
