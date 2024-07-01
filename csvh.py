@@ -145,7 +145,9 @@ def dialect_args(args: argparse.Namespace) -> csv.Dialect:
     return dialect
 
 
-def main():
+def parse_args():
+    """Specify command-line parameters"""
+
     # define command-line paramerters
     arg_parser = argparse.ArgumentParser(description=__doc__)
     file_group = arg_parser.add_argument_group("file")
@@ -175,6 +177,12 @@ def main():
 
     # read command-line paramerters
     args = arg_parser.parse_args()
+    return args
+
+
+def main() -> None:
+    # read command-line parameters
+    args = parse_args()
 
     # prepare logging
     logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.NOTSET)
