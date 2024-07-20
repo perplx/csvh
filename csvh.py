@@ -43,9 +43,9 @@ def process_csv(
     logger.debug("reading from file %s", input_file.name)
 
     # skip prolog
-    num_prolog_lines = max(keep_prolog, skip_prolog)
+    prolog_lines = []
     if keep_prolog or skip_prolog:
-        prolog_lines = []
+        num_prolog_lines = max(keep_prolog, skip_prolog)
         for i in range(1, num_prolog_lines + 1):
             line = input_file.readline()
             if keep_prolog:
