@@ -3,12 +3,37 @@
 import argparse
 import csv
 import logging
-from typing import Iterable, Sequence, TextIO
+from typing import Iterable, Optional, Sequence, TextIO
 
+
+# global constants
+# DEFAULT_QUOTING = csv.QUOTE_ALL
+# DEFAULT_QUOTING = csv.QUOTE_MINIMAL
+DEFAULT_QUOTING = csv.QUOTE_NONE
+# DEFAULT_QUOTING = csv.QUOTE_NONNUMERIC
+DEFAULT_QUOTECHAR = '"'
+DEFAULT_ESCAPECHAR = "\\"
 
 # prepare global logger
 logger = logging.getLogger(__name__)
 
+
+# dialect
+def read_dialect(delimiter: Optional[str], quoting: int, quotechar: str, escapechar: str) -> csv.Dialect:
+
+    dialect: csv.Dialect = csv.excel()  # default in std lib
+    logger.debug("starting dialect: %s", dialect)
+    if delimiter:
+        dialect.delimiter = delimiter
+    if quoting:
+        dialect.quoting = quoting
+    if quotechar:
+        dialect.quotechar = quotechar
+    if escapechar:
+        dialect.escapechar = escapechar
+
+    logger.debug("returning dialect: %s", dialect)
+    return dialect
 
 # prolog-filtering
 
@@ -87,10 +112,16 @@ def filter_rows(input_rows: Iterable[dict[str, str]], keep_rows: dict[str, list[
 
 
 def process_csv(
+    # files
     input_file: TextIO,
     output_file: TextIO,
+    # dialect
+    input_dialect: csv.Dialect,
+    output_dialect: csv.Dialect,
+    # prolog
     keep_prolog: int,
     skip_prolog: int,
+    # filter
     keep_cols: list[str],
     skip_cols: list[str],
     keep_rows: dict[str, list[str]],
@@ -99,12 +130,13 @@ def process_csv(
     """Process CSV from ``input_file``, write to ``output_file``."""
 
     # prepare to read from to input-file
-    logger.debug("reading from file %s", input_file.name)
+    logger.debug("reading from file: %s", input_file.name)
 
     # filter prolog-lines
     prolog_lines = filter_prolog(input_file, keep_prolog, skip_prolog)
 
-    csv_reader = csv.DictReader(input_file)
+    logger.debug("input csv dialect: %s", input_dialect)
+    csv_reader = csv.DictReader(input_file, dialect=input_dialect)
     csv_fields = csv_reader.fieldnames
     if csv_fields is None:
         csv_fields = []
@@ -114,7 +146,7 @@ def process_csv(
     logger.debug("keeping columns: %s", kept_cols)
 
     # prepare to write to output-file
-    logger.debug("writing to file %s", output_file.name)
+    logger.debug("writing to file: %s", output_file.name)
     csv_writer = csv.DictWriter(output_file, kept_cols)
 
     # write prolog lines that were kept
@@ -141,11 +173,16 @@ def parse_args():
     file_group.add_argument("input_file", type=argparse.FileType("rt"))
     file_group.add_argument("output_file", type=argparse.FileType("wt"))
 
-    # FIXME separate input, output dialects
-    quoting_group = arg_parser.add_argument_group("quoting")
-    quoting_group.add_argument("--quoting")
-    quoting_group.add_argument("--quotechar")
-    quoting_group.add_argument("--escapechar")
+    # FIXME dialect names
+    dialect_group = arg_parser.add_argument_group("dialect")
+    dialect_group.add_argument("--input-delimiter")
+    dialect_group.add_argument("--input-quoting")
+    dialect_group.add_argument("--input-quotechar")
+    dialect_group.add_argument("--input-escapechar")
+    dialect_group.add_argument("--output-delimiter")
+    dialect_group.add_argument("--output-quoting")
+    dialect_group.add_argument("--output-quotechar")
+    dialect_group.add_argument("--output-escapechar")
 
     prolog_group = arg_parser.add_mutually_exclusive_group()
     prolog_group.add_argument(
@@ -182,6 +219,23 @@ def main():
     logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.NOTSET)
     logger.debug("args: %s", args)
 
+    # dialects
+    input_dialect = read_dialect(
+        args.input_delimiter,
+        args.input_quoting,
+        args.input_quotechar,
+        args.input_escapechar,
+    )
+    logger.debug("input dialect: %s", input_dialect)
+    output_dialect = read_dialect(
+        args.output_delimiter,
+        args.output_quoting,
+        args.output_quotechar,
+        args.output_escapechar,
+    )
+    logger.debug("output dialect: %s", output_dialect)
+
+    # row-filters
     keep_rows = read_row_filters(args.keep_rows),
     skip_rows = read_row_filters(args.skip_rows),
 
@@ -190,6 +244,9 @@ def main():
         # files
         args.input_file,
         args.output_file,
+        # dialect
+        input_dialect,
+        output_dialect,
         # prolog
         args.keep_prolog,
         args.skip_prolog,
