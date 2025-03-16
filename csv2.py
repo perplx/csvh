@@ -3,7 +3,7 @@
 import argparse
 import csv
 import logging
-from typing import Iterable, Sequence, TextIO
+from typing import Callable, Iterable, Optional, Sequence, TextIO
 
 
 # global constants
@@ -14,18 +14,42 @@ DIALECT_ATTRS = [
     "quotechar",
     "escapechar",
 ]
+# FIXME not using csv.get_dialect() because type mismatch csv.Dialect vs csv._Dialect vs. _csv.Dialect !?
+DIALECT_NAMES: dict[str, Callable[[], csv.Dialect]] = {
+    "excel": csv.excel,
+    "excel_tab": csv.excel_tab,
+    "unix": csv.unix_dialect,
+}
 
 # prepare global logger
 logger = logging.getLogger(__name__)
 
 
 # dialect
-def read_dialect(name: str, delimiter: str, quoting: int, quotechar: str, escapechar: str) -> csv.Dialect:
 
-    if name:
-        raise NotImplementedError  # FIXME
 
-    dialect: csv.Dialect = csv.excel()  # default in std lib
+def init_dialect(name: Optional[str] = None) -> csv.Dialect:
+    if name is None:
+        logger.debug("using default dialect: excel")
+        return csv.excel()
+    else:
+        logger.debug("using given dialect name: %s", name)
+        try:
+            dialect_func = DIALECT_NAMES[name]
+        except KeyError as e:
+            raise ValueError(e)
+        return dialect_func()
+
+
+def read_dialect(
+    dialect: csv.Dialect,
+    delimiter: Optional[str] = None,
+    quoting: Optional[int] = None,
+    quotechar: Optional[str] = None,
+    escapechar: Optional[str] = None
+) -> csv.Dialect:
+    """Modify dialect with given parameters"""
+
     logger.debug("starting dialect: %s", dialect)
     if delimiter:
         dialect.delimiter = delimiter
@@ -77,7 +101,7 @@ def keep_fields(input_cols: Sequence[str], keep_cols: list[str], skip_cols: list
     return kept_cols
 
 
-# fixme modify input row instead?
+# FIXME modify input row instead?
 def filter_cols(row: dict[str, str], keep_cols: list[str]) -> dict[str, str]:
     """Return trow with only the columns in ``keep_cols``."""
     if keep_cols:
@@ -175,6 +199,10 @@ def process_csv(
 # main
 
 
+def dialect_arg(name: str) -> csv.Dialect:
+    return init_dialect(name)  # raises ValueError, picked up by ArgumentPArser
+
+
 def parse_args():
     """Specify command-line parameters"""
 
@@ -186,7 +214,13 @@ def parse_args():
 
     # input dialect
     input_dialect_group = arg_parser.add_argument_group("input dialect")
-    input_dialect_group.add_argument("--input-dialect", metavar="N", help="name of the input Dialect")
+    input_dialect_group.add_argument(
+        "--input-dialect",
+        type=dialect_arg,
+        default=csv.excel(),
+        metavar="N",
+        help="name of the input Dialect",
+    )
     input_dialect_group.add_argument("--input-delimiter", metavar="D", help="delimiter for the input Dialect")
     input_dialect_group.add_argument("--input-quoting", metavar="Q", help="quoting for the input Dialect")
     input_dialect_group.add_argument("--input-quotechar", metavar="C", help="quotechar for the input Dialect")
@@ -194,7 +228,13 @@ def parse_args():
 
     # output dialect
     output_dialect_group = arg_parser.add_argument_group("output dialect")
-    output_dialect_group.add_argument("--output-dialect", metavar="N", help="name of the output Dialect")
+    output_dialect_group.add_argument(
+        "--output-dialect",
+        type=dialect_arg,
+        default=csv.excel(),
+        metavar="N",
+        help="name of the output Dialect",
+    )
     output_dialect_group.add_argument("--output-delimiter", metavar="D", help="delimiter for the output Dialect")
     output_dialect_group.add_argument("--output-quoting", metavar="Q", help="quoting for the output Dialect")
     output_dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
@@ -241,7 +281,7 @@ def main():
     logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.NOTSET)
     logger.debug("args: %s", args)
 
-    # dialects
+    # input dialect
     input_dialect = read_dialect(
         args.input_dialect,
         args.input_delimiter,
@@ -251,6 +291,8 @@ def main():
     )
     logger.debug("input dialect:")
     log_dialect(logging.DEBUG, input_dialect)
+
+    # output dialect
     output_dialect = read_dialect(
         args.output_dialect,
         args.output_delimiter,
