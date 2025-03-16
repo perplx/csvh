@@ -120,3 +120,63 @@ class TestFilterCols(unittest.TestCase):
         self.assertEqual(csv2.filter_cols(input_row, ["b", "d"]), {"b": "2", "d": "4"})
         with self.assertRaises(KeyError):
             _ = csv2.filter_cols(input_row, ["BOGUS!"])
+
+
+class TestFilterRows(unittest.TestCase):
+    """Test row-filtering functions."""
+
+    def test_read_cols(self):
+        """Test `read_row_filters()`."""
+        row_args = [["a", "a1", "a2"], ["b", "b2", "b4"]]
+        row_filters = {"a": ["a1", "a2"], "b": ["b2", "b4"]}
+        self.assertEqual(csv2.read_row_filters(row_args), row_filters)
+
+    def test_keep_row(self):
+        """Test `keep_row()`."""
+        row_filters = {"a": ["a1", "a2"], "b": ["b2", "b4"]}
+
+        # test all filters are satisfied
+        self.assertEqual(csv2.keep_row({"a": "a1", "b": "b1"}, row_filters), False)  # one match
+        self.assertEqual(csv2.keep_row({"a": "a2", "b": "b2"}, row_filters), True)  # both match
+        self.assertEqual(csv2.keep_row({"a": "a3", "b": "b3"}, row_filters), False)  # no match
+        self.assertEqual(csv2.keep_row({"a": "a4", "b": "b4"}, row_filters), False)  # one match
+
+        # test missing key in filters
+        with self.assertRaises(KeyError):
+            _ = csv2.keep_row({}, row_filters)
+        with self.assertRaises(KeyError):
+            _ = csv2.keep_row({"a": "a0"}, row_filters)
+
+    def test_skip_row(self):
+        """Test `skip_row()`."""
+        row_filters = {"a": ["a1", "a2"], "b": ["b2", "b4"]}
+
+        # test all filters are satisfied
+        self.assertEqual(csv2.skip_row({"a": "a1", "b": "b1"}, row_filters), False)  # one match
+        self.assertEqual(csv2.skip_row({"a": "a2", "b": "b2"}, row_filters), False)  # both match
+        self.assertEqual(csv2.skip_row({"a": "a3", "b": "b3"}, row_filters), True)  # no match
+        self.assertEqual(csv2.skip_row({"a": "a4", "b": "b4"}, row_filters), False)  # one match
+
+        # test missing key in filters
+        with self.assertRaises(KeyError):
+            _ = csv2.skip_row({}, row_filters)
+        with self.assertRaises(KeyError):
+            _ = csv2.skip_row({"a": "a0"}, row_filters)
+
+    def test_filter_rows(self):
+        """Test `filter_rows()`."""
+
+        input_rows = [
+            {"a": "a1", "b": "b1"},
+            {"a": "a2", "b": "b2"},
+            {"a": "a3", "b": "b3"},
+            {"a": "a4", "b": "b4"},
+        ]
+
+        test_rows = list(csv2.filter_rows(input_rows, {}, {}))
+        self.assertEqual(test_rows, input_rows)
+
+        keep_rows = {"a": ["a1", "a2"]}
+        skip_rows = {"b": ["b2", "b4"]}
+        test_rows = list(csv2.filter_rows(input_rows, keep_rows, skip_rows))
+        self.assertEqual(test_rows, [{"a": "a1", "b": "b1"}])
