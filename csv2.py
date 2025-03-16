@@ -254,8 +254,13 @@ def main():
     log_dialect(logging.DEBUG, output_dialect)
 
     # row-filters
+    # FIXME log when filter applied?
     keep_rows = read_row_filters(args.keep_rows)
+    if keep_rows:
+        logger.debug("keep_rows: %s", keep_rows)
     skip_rows = read_row_filters(args.skip_rows)
+    if skip_rows:
+        logger.debug("skip_rows: %s", skip_rows)
 
     # process CSV
     process_csv(
