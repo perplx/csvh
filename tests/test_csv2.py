@@ -48,7 +48,7 @@ class TestProlog(unittest.TestCase):
     PROLOG_LINES = ["BOGUS BOGUS BOGUS\n"]
 
     def setUp(self):
-        """Open test-files."""
+        """Open test-files. `self._prolog_file` has the prolog, `self._test_file` has no prolog, otherwise identical."""
         self._prolog_file = open("data/tess_01.csv", "rt")
         self._test_file = open("data/tess_00.csv", "rt")
 
@@ -60,9 +60,11 @@ class TestProlog(unittest.TestCase):
     def test_filter_prolog_keep(self):
         """Test `filter_prolog(keep_prolog=1)`."""
 
+        # ensure the prolog lines are kept
         prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
         self.assertEqual(prolog_lines, self.PROLOG_LINES)
 
+        # ensure the prolog was skipped
         prolog_text = self._prolog_file.read()
         test_text = self._test_file.read()
         self.assertEqual(prolog_text, test_text)
@@ -70,9 +72,11 @@ class TestProlog(unittest.TestCase):
     def test_filter_prolog_skip(self):
         """Test `filter_prolog(skip_prolog=1)`."""
 
+        # ensure the prolog lines are skipped
         prolog_lines = csv2.filter_prolog(self._prolog_file, 0, 1)
         self.assertEqual(prolog_lines, [])
 
+        # ensure the prolog was skipped
         prolog_text = self._prolog_file.read()
         test_text = self._test_file.read()
         self.assertEqual(prolog_text, test_text)
@@ -83,9 +87,11 @@ class TestProlog(unittest.TestCase):
         As implemented, `keep_prolog` overrides `skip_prolog`.
         """
 
-        prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
+        # ensure the prolog lines are kept
+        prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 1)
         self.assertEqual(prolog_lines, self.PROLOG_LINES)
 
+        # ensure the prolog was skipped
         prolog_text = self._prolog_file.read()
         test_text = self._test_file.read()
         self.assertEqual(prolog_text, test_text)
