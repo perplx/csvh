@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""CSV processing command-line tool."""
+
 import argparse
 import csv
 import logging
