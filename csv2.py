@@ -94,7 +94,9 @@ def filter_prolog(input_file: TextIO, keep_prolog: int, skip_prolog: int) -> lis
 
 # TODO order by keep_cols? repeats?
 def read_cols(input_cols: Sequence[str], keep_cols: list[str], skip_cols: list[str]) -> list[str]:
-    """List the columns to keep from the input-file based on lists of columns to keep and skip."""
+    """List the columns to keep from the input-file based on lists of columns to keep and skip.
+    If `keep_cols` is not empty, `skip_cols` is not used.
+    """
 
     # preconditions
     for i, c in enumerate(keep_cols):

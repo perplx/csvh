@@ -13,7 +13,7 @@ class TestDialect(unittest.TestCase):
     """Test dialect functions."""
 
     def test_init_dialect(self):
-        """Test init_dialect()"""
+        """Test `init_dialect()`."""
         self.assertIsInstance(csv2.init_dialect(), csv.excel)
         self.assertIsInstance(csv2.init_dialect("excel"), csv.excel)
         self.assertIsInstance(csv2.init_dialect("excel_tab"), csv.excel_tab)
@@ -22,7 +22,7 @@ class TestDialect(unittest.TestCase):
             _ = csv2.init_dialect("BOGUS")
 
     def test_read_dialect(self):
-        """Test read_dialect()"""
+        """Test `read_dialect()`."""
 
         # Dialect before and after test
         dialect_base = csv.excel()
@@ -58,7 +58,7 @@ class TestProlog(unittest.TestCase):
         self._test_file.close()
 
     def test_filter_prolog_keep(self):
-        """Test"""
+        """Test `filter_prolog(keep_prolog=1)`."""
 
         prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
         self.assertEqual(prolog_lines, self.PROLOG_LINES)
@@ -68,6 +68,8 @@ class TestProlog(unittest.TestCase):
         self.assertEqual(prolog_text, test_text)
 
     def test_filter_prolog_skip(self):
+        """Test `filter_prolog(skip_prolog=1)`."""
+
         prolog_lines = csv2.filter_prolog(self._prolog_file, 0, 1)
         self.assertEqual(prolog_lines, [])
 
@@ -77,6 +79,10 @@ class TestProlog(unittest.TestCase):
 
     # keep overrides skip
     def test_filter_prolog_both(self):
+        """Test `filter_prolog(keep_prolog=1, skip_prolog=1)`.
+        As implemented, `keep_prolog` overrides `skip_prolog`.
+        """
+
         prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
         self.assertEqual(prolog_lines, self.PROLOG_LINES)
 
@@ -89,7 +95,7 @@ class TestFilterCols(unittest.TestCase):
     """Test column-filtering functions."""
 
     def test_read_cols(self):
-        """Test read_cols()"""
+        """Test `read_cols()`."""
         input_cols = ["a", "b", "c", "d"]
         self.assertEqual(csv2.read_cols(input_cols, [], []), input_cols)
         self.assertEqual(csv2.read_cols(input_cols, ["a", "c"], []), ["a", "c"])
@@ -101,7 +107,7 @@ class TestFilterCols(unittest.TestCase):
             _ = csv2.read_cols(input_cols, [], ["BOGUS!"])
 
     def test_filter_cols(self):
-        """Test filter_cols()"""
+        """Test `filter_cols()`."""
         input_row = {"a": "1", "b": "2", "c": "3", "d": "4"}
         self.assertEqual(csv2.filter_cols({}, []), {})
         self.assertEqual(csv2.filter_cols(input_row, []), input_row)
