@@ -95,6 +95,18 @@ def filter_prolog(input_file: TextIO, keep_prolog: int, skip_prolog: int) -> lis
 # TODO order by keep_cols? repeats?
 def read_cols(input_cols: Sequence[str], keep_cols: list[str], skip_cols: list[str]) -> list[str]:
     """List the columns to keep from the input-file based on lists of columns to keep and skip."""
+
+    # preconditions
+    for i, c in enumerate(keep_cols):
+        if c not in input_cols:
+            logger.error("keep_cols index %d : %r not in input_cols!", i, c)
+            raise KeyError
+    for i, c in enumerate(skip_cols):
+        if c not in input_cols:
+            logger.error("skip_cols index %d : %r not in input_cols!", i, c)
+            raise KeyError
+
+    # keep `input_cols`` found in `keep_cols`` and not in `skip_cols``
     kept_cols = list(input_cols)
     if keep_cols:
         kept_cols = [c for c in kept_cols if c in keep_cols]

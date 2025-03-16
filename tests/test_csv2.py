@@ -57,9 +57,9 @@ class TestFilterCols(unittest.TestCase):
         self.assertEqual(csv2.read_cols(input_cols, ["a", "c"], []), ["a", "c"])
         self.assertEqual(csv2.read_cols(input_cols, [], ["a", "c"]), ["b", "d"])
         self.assertEqual(csv2.read_cols(input_cols, ["a", "c"], ["c"]), ["a"])
-        with self.assertRaises(IndexError):
+        with self.assertRaises(KeyError):
             _ = csv2.read_cols(input_cols, ["BOGUS!"], [])
-        with self.assertRaises(IndexError):
+        with self.assertRaises(KeyError):
             _ = csv2.read_cols(input_cols, [], ["BOGUS!"])
 
     def test_filter_cols(self):
