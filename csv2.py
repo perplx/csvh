@@ -186,39 +186,45 @@ def parse_args():
     # define command-line paramerters
     arg_parser = argparse.ArgumentParser(description=__doc__)
     file_group = arg_parser.add_argument_group("file")
-    file_group.add_argument("input_file", type=argparse.FileType("rt"))
-    file_group.add_argument("output_file", type=argparse.FileType("wt"))
+    file_group.add_argument("input_file", type=argparse.FileType("rt"), help="input CSV file")
+    file_group.add_argument("output_file", type=argparse.FileType("wt"), help="output CSV file")
 
     # FIXME dialect names
     dialect_group = arg_parser.add_argument_group("dialect")
-    dialect_group.add_argument("--input-delimiter")
-    dialect_group.add_argument("--input-quoting")
-    dialect_group.add_argument("--input-quotechar")
-    dialect_group.add_argument("--input-escapechar")
-    dialect_group.add_argument("--output-delimiter")
-    dialect_group.add_argument("--output-quoting")
-    dialect_group.add_argument("--output-quotechar")
-    dialect_group.add_argument("--output-escapechar")
+    dialect_group.add_argument("--input-delimiter", metavar="D", help="delimiter for the input Dialect")
+    dialect_group.add_argument("--input-quoting", metavar="Q", help="quoting for the input Dialect")
+    dialect_group.add_argument("--input-quotechar", metavar="C", help="quotechar for the input Dialect")
+    dialect_group.add_argument("--input-escapechar", metavar="C", help="escapechar for the input Dialect")
+    dialect_group.add_argument("--output-delimiter", metavar="D", help="delimiter for the output Dialect")
+    dialect_group.add_argument("--output-quoting", metavar="Q", help="quoting for the output Dialect")
+    dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
+    dialect_group.add_argument("--output-escapechar", metavar="C", help="escapechar for the output Dialect")
 
     prolog_group = arg_parser.add_mutually_exclusive_group()
     prolog_group.add_argument(
-        "--keep-prolog", type=int, default=0,
+        "--keep-prolog", type=int, default=0, metavar="N",
         help="number of header lines to skip, they will be reproduced in the output"
     )
     prolog_group.add_argument(
-        "--skip-prolog", type=int, default=0,
+        "--skip-prolog", type=int, default=0, metavar="N",
         help="number of header lines to skip, they will be omitted in the output"
     )
 
     filter_group = arg_parser.add_argument_group("filter")
     filter_group.add_argument(
-        "--keep-cols", type=str, nargs="+", help="list of column-names to keep, in the order to be kept"
+        "--keep-cols", type=str, nargs="+", metavar="C", help="list of column-names to keep, in the order to be kept"
     )
     filter_group.add_argument(
-        "--skip-cols", type=str, nargs="+", help="list of column-names to skip, in the order to be kept"
+        "--skip-cols", type=str, nargs="+", metavar="C", help="list of column-names to skip, in the order to be kept"
     )
-    filter_group.add_argument("--keep-rows", type=str, nargs="+", action="append", default=[])
-    filter_group.add_argument("--skip-rows", type=str, nargs="+", action="append", default=[])
+    filter_group.add_argument(
+        "--keep-rows", type=str, nargs="+", action="append", default=[], metavar=("R", "V"),
+        help="column-name followed by list of allowed values"
+        )
+    filter_group.add_argument(
+        "--skip-rows", type=str, nargs="+", action="append", default=[], metavar=("R", "V"),
+        help="column-name followed by list of skipped values"
+    )
 
     # read command-line paramerters
     args = arg_parser.parse_args()
