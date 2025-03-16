@@ -43,8 +43,44 @@ class TestDialect(unittest.TestCase):
 class TestProlog(unittest.TestCase):
     """Test prolog functions."""
 
-    def test_filter_prolog(self):
-        raise NotImplementedError
+    PROLOG_LINES = ["BOGUS BOGUS BOGUS\n"]
+
+    def setUp(self):
+        """Open test-files."""
+        self._prolog_file = open("data/tess_01.csv", "rt")
+        self._test_file = open("data/tess_00.csv", "rt")
+
+    def tearDown(self):
+        """Close test-files."""
+        self._prolog_file.close()
+        self._test_file.close()
+
+    def test_filter_prolog_keep(self):
+        """Test"""
+
+        prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
+        self.assertEqual(prolog_lines, self.PROLOG_LINES)
+
+        prolog_text = self._prolog_file.read()
+        test_text = self._test_file.read()
+        self.assertEqual(prolog_text, test_text)
+
+    def test_filter_prolog_skip(self):
+        prolog_lines = csv2.filter_prolog(self._prolog_file, 0, 1)
+        self.assertEqual(prolog_lines, [])
+
+        prolog_text = self._prolog_file.read()
+        test_text = self._test_file.read()
+        self.assertEqual(prolog_text, test_text)
+
+    # keep overrides skip
+    def test_filter_prolog_both(self):
+        prolog_lines = csv2.filter_prolog(self._prolog_file, 1, 0)
+        self.assertEqual(prolog_lines, self.PROLOG_LINES)
+
+        prolog_text = self._prolog_file.read()
+        test_text = self._test_file.read()
+        self.assertEqual(prolog_text, test_text)
 
 
 class TestFilterCols(unittest.TestCase):
