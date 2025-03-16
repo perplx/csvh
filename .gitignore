@@ -1,2 +1,23 @@
-# python
+# git
+.gitconfig
+
+# python docs
+docs/_build
+
+# python src
+*.egg-info
+__pycache__/
+
+# tools
+.mypy_cache/
+.pytest_cache/
+.coverage
+build/
+
+# vim
+*~
+*.sw[pon]
+
+# vscode
 .venv/
+.vscode/
