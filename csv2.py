@@ -3,7 +3,7 @@
 import argparse
 import csv
 import logging
-from typing import Iterable, Optional, Sequence, TextIO
+from typing import Iterable, Sequence, TextIO
 
 
 # global constants
@@ -19,7 +19,10 @@ logger = logging.getLogger(__name__)
 
 
 # dialect
-def read_dialect(delimiter: Optional[str], quoting: int, quotechar: str, escapechar: str) -> csv.Dialect:
+def read_dialect(name: str, delimiter: str, quoting: int, quotechar: str, escapechar: str) -> csv.Dialect:
+
+    if name:
+        raise NotImplementedError  # FIXME
 
     dialect: csv.Dialect = csv.excel()  # default in std lib
     logger.debug("starting dialect: %s", dialect)
@@ -191,10 +194,12 @@ def parse_args():
 
     # FIXME dialect names
     dialect_group = arg_parser.add_argument_group("dialect")
+    dialect_group.add_argument("--input-dialect", metavar="N", help="name of the input Dialect")
     dialect_group.add_argument("--input-delimiter", metavar="D", help="delimiter for the input Dialect")
     dialect_group.add_argument("--input-quoting", metavar="Q", help="quoting for the input Dialect")
     dialect_group.add_argument("--input-quotechar", metavar="C", help="quotechar for the input Dialect")
     dialect_group.add_argument("--input-escapechar", metavar="C", help="escapechar for the input Dialect")
+    dialect_group.add_argument("--output-dialect", metavar="N", help="name of the output Dialect")
     dialect_group.add_argument("--output-delimiter", metavar="D", help="delimiter for the output Dialect")
     dialect_group.add_argument("--output-quoting", metavar="Q", help="quoting for the output Dialect")
     dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
@@ -243,6 +248,7 @@ def main():
 
     # dialects
     input_dialect = read_dialect(
+        args.input_dialect,
         args.input_delimiter,
         args.input_quoting,
         args.input_quotechar,
@@ -251,6 +257,7 @@ def main():
     logger.debug("input dialect:")
     log_dialect(logging.DEBUG, input_dialect)
     output_dialect = read_dialect(
+        args.output_dialect,
         args.output_delimiter,
         args.output_quoting,
         args.output_quotechar,
