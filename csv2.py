@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def filter_prolog(input_file: TextIO, keep_prolog: int, skip_prolog: int) -> list[str]:
-    """FIXME"""
-
+    """Filter the first lines in the file."""
     prolog_lines = []
     num_prolog_lines = max(keep_prolog, skip_prolog)
     for i in range(1, num_prolog_lines + 1):
@@ -33,20 +32,18 @@ def filter_prolog(input_file: TextIO, keep_prolog: int, skip_prolog: int) -> lis
 
 # TODO order by keep_cols? repeats?
 def keep_fields(input_cols: Sequence[str], keep_cols: list[str], skip_cols: list[str]) -> list[str]:
-    """FIXME"""
-
+    """List the columns to keep from the input-file based on lists of columns to keep and skip."""
     kept_cols = list(input_cols)
     if keep_cols:
         kept_cols = [c for c in kept_cols if c in keep_cols]
     if skip_cols:
         kept_cols = [c for c in kept_cols if c not in skip_cols]
-
     return kept_cols
 
 
 # fixme modify input row instead?
 def filter_cols(row: dict[str, str], keep_cols: list[str]) -> dict[str, str]:
-    """FIXME"""
+    """Return trow with only the columns in ``keep_cols``."""
     if keep_cols:
         return {c: row[c] for c in keep_cols}
     return row
@@ -55,11 +52,14 @@ def filter_cols(row: dict[str, str], keep_cols: list[str]) -> dict[str, str]:
 # row-filtering
 
 
+# FIXME make this a type= for ArgumentParser?
 def read_row_filters(row_args: list[list[str]]) -> dict[str, list[str]]:
+    """Parse row-filter command-line parameters."""
     return {r[0]: r[1:] for r in row_args}
 
 
 def keep_row(row, keep_rows: dict[str, list[str]]) -> bool:
+    """Whether to keep a row based on the row-filters for rows to keep."""
     if keep_rows:
         for col, values in keep_rows.items():
             if row[col] not in values:
@@ -68,6 +68,7 @@ def keep_row(row, keep_rows: dict[str, list[str]]) -> bool:
 
 
 def skip_row(row, skip_rows: dict[str, list[str]]) -> bool:
+    """Whether to keep a row based on the row-filters for rows to skip."""
     if skip_rows:
         for col, values in skip_rows.items():
             if row[col] in values:
@@ -76,6 +77,7 @@ def skip_row(row, skip_rows: dict[str, list[str]]) -> bool:
 
 
 def filter_rows(input_rows: Iterable[dict[str, str]], keep_rows: dict[str, list[str]], skip_rows: dict[str, list[str]]):
+    """Keep rows that match the row-filters."""
     for row in input_rows:
         if keep_row(row, keep_rows) and skip_row(row, skip_rows):
             yield row
@@ -94,7 +96,7 @@ def process_csv(
     keep_rows: dict[str, list[str]],
     skip_rows: dict[str, list[str]],
 ) -> None:
-    """FIXME"""
+    """Process CSV from ``input_file``, write to ``output_file``."""
 
     # prepare to read from to input-file
     logger.debug("reading from file %s", input_file.name)
@@ -171,6 +173,8 @@ def parse_args():
 
 
 def main():
+    """Process CSV."""
+
     # read command-line parameters
     args = parse_args()
 
