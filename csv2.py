@@ -7,12 +7,13 @@ from typing import Iterable, Sequence, TextIO
 
 
 # global constants
-# DEFAULT_QUOTING = csv.QUOTE_ALL
-# DEFAULT_QUOTING = csv.QUOTE_MINIMAL
-DEFAULT_QUOTING = csv.QUOTE_NONE
-# DEFAULT_QUOTING = csv.QUOTE_NONNUMERIC
-DEFAULT_QUOTECHAR = '"'
-DEFAULT_ESCAPECHAR = "\\"
+DIALECT_ATTRS = [
+    "delimiter",
+    "lineterminator",
+    "quoting",
+    "quotechar",
+    "escapechar",
+]
 
 # prepare global logger
 logger = logging.getLogger(__name__)
@@ -37,15 +38,6 @@ def read_dialect(name: str, delimiter: str, quoting: int, quotechar: str, escape
 
     logger.debug("returning dialect: %s", dialect)
     return dialect
-
-
-DIALECT_ATTRS = [
-    "delimiter",
-    "lineterminator",
-    "quoting",
-    "quotechar",
-    "escapechar",
-]
 
 
 def log_dialect(log_level: int, dialect: csv.Dialect) -> None:
