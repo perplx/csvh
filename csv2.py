@@ -184,18 +184,21 @@ def parse_args():
     file_group.add_argument("input_file", type=argparse.FileType("rt"), help="input CSV file")
     file_group.add_argument("output_file", type=argparse.FileType("wt"), help="output CSV file")
 
-    # FIXME dialect names
-    dialect_group = arg_parser.add_argument_group("dialect")
-    dialect_group.add_argument("--input-dialect", metavar="N", help="name of the input Dialect")
-    dialect_group.add_argument("--input-delimiter", metavar="D", help="delimiter for the input Dialect")
-    dialect_group.add_argument("--input-quoting", metavar="Q", help="quoting for the input Dialect")
-    dialect_group.add_argument("--input-quotechar", metavar="C", help="quotechar for the input Dialect")
-    dialect_group.add_argument("--input-escapechar", metavar="C", help="escapechar for the input Dialect")
-    dialect_group.add_argument("--output-dialect", metavar="N", help="name of the output Dialect")
-    dialect_group.add_argument("--output-delimiter", metavar="D", help="delimiter for the output Dialect")
-    dialect_group.add_argument("--output-quoting", metavar="Q", help="quoting for the output Dialect")
-    dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
-    dialect_group.add_argument("--output-escapechar", metavar="C", help="escapechar for the output Dialect")
+    # input dialect
+    input_dialect_group = arg_parser.add_argument_group("input dialect")
+    input_dialect_group.add_argument("--input-dialect", metavar="N", help="name of the input Dialect")
+    input_dialect_group.add_argument("--input-delimiter", metavar="D", help="delimiter for the input Dialect")
+    input_dialect_group.add_argument("--input-quoting", metavar="Q", help="quoting for the input Dialect")
+    input_dialect_group.add_argument("--input-quotechar", metavar="C", help="quotechar for the input Dialect")
+    input_dialect_group.add_argument("--input-escapechar", metavar="C", help="escapechar for the input Dialect")
+
+    # output dialect
+    output_dialect_group = arg_parser.add_argument_group("output dialect")
+    output_dialect_group.add_argument("--output-dialect", metavar="N", help="name of the output Dialect")
+    output_dialect_group.add_argument("--output-delimiter", metavar="D", help="delimiter for the output Dialect")
+    output_dialect_group.add_argument("--output-quoting", metavar="Q", help="quoting for the output Dialect")
+    output_dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
+    output_dialect_group.add_argument("--output-escapechar", metavar="C", help="escapechar for the output Dialect")
 
     prolog_group = arg_parser.add_mutually_exclusive_group()
     prolog_group.add_argument(
