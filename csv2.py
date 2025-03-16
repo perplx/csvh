@@ -35,6 +35,22 @@ def read_dialect(delimiter: Optional[str], quoting: int, quotechar: str, escapec
     logger.debug("returning dialect: %s", dialect)
     return dialect
 
+
+DIALECT_ATTRS = [
+    "delimiter",
+    "lineterminator",
+    "quoting",
+    "quotechar",
+    "escapechar",
+]
+
+
+def log_dialect(log_level: int, dialect: csv.Dialect) -> None:
+    logger.log(log_level, "Dialect:")
+    for attr in DIALECT_ATTRS:  # FIXME add more fields
+        logger.log(log_level, "\t%s = %r", attr, getattr(dialect, attr))
+
+
 # prolog-filtering
 
 
@@ -226,14 +242,16 @@ def main():
         args.input_quotechar,
         args.input_escapechar,
     )
-    logger.debug("input dialect: %s", input_dialect)
+    logger.debug("input dialect:")
+    log_dialect(logging.DEBUG, input_dialect)
     output_dialect = read_dialect(
         args.output_delimiter,
         args.output_quoting,
         args.output_quotechar,
         args.output_escapechar,
     )
-    logger.debug("output dialect: %s", output_dialect)
+    logger.debug("output dialect:")
+    log_dialect(logging.DEBUG, output_dialect)
 
     # row-filters
     keep_rows = read_row_filters(args.keep_rows),
