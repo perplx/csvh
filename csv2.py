@@ -254,8 +254,8 @@ def main():
     log_dialect(logging.DEBUG, output_dialect)
 
     # row-filters
-    keep_rows = read_row_filters(args.keep_rows),
-    skip_rows = read_row_filters(args.skip_rows),
+    keep_rows = read_row_filters(args.keep_rows)
+    skip_rows = read_row_filters(args.skip_rows)
 
     # process CSV
     process_csv(
