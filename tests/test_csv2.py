@@ -26,14 +26,16 @@ class TestDialect(unittest.TestCase):
 
         # Dialect before and after test
         dialect_base = csv.excel()
-        dialect_test = copy.copy(dialect_base)
+        dialect_copy = copy.copy(dialect_base)
+        dialect_test = csv2.read_dialect(dialect_copy, delimiter="\t", quoting=csv.QUOTE_NONE)
 
         # test which fields are modified
-        dialect_test = csv2.read_dialect(dialect_test, delimiter="\t", quoting=csv.QUOTE_NONE)
         self.assertEqual(dialect_test.delimiter, "\t")
         self.assertNotEqual(dialect_test.delimiter, dialect_base.delimiter)
         self.assertEqual(dialect_test.quoting, csv.QUOTE_NONE)
         self.assertNotEqual(dialect_test.quoting, dialect_base.quoting)
+
+        # test which fields are unchanged
         self.assertEqual(dialect_test.quotechar, dialect_base.quotechar)
         self.assertEqual(dialect_test.escapechar , dialect_base.escapechar)
         self.assertEqual(dialect_test.lineterminator, dialect_base.lineterminator)
