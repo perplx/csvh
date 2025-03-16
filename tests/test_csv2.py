@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # standard imports
+import argparse
 import copy
 import csv
 import unittest
@@ -180,3 +181,22 @@ class TestFilterRows(unittest.TestCase):
         skip_rows = {"b": ["b2", "b4"]}
         test_rows = list(csv2.filter_rows(input_rows, keep_rows, skip_rows))
         self.assertEqual(test_rows, [{"a": "a1", "b": "b1"}])
+
+
+class TestArg(unittest.TestCase):
+    def setUp(self):
+        self._arg_parser = argparse.ArgumentParser()
+        self._arg_parser.add_argument("dialect", type=csv2.dialect_arg)
+
+    def test_dialect_arg(self):
+        """Test `dialect_arg()`."""
+
+        # test valid names
+        for name in [None, "excel", "excel_tab", "unix"]:
+            dialect = csv2.dialect_arg(name)
+            self.assertIsInstance(dialect, csv.Dialect)
+
+        # test invalid names
+        for name in ["", "BOGUS"]:
+            with self.assertRaises(ValueError):
+                _ = csv2.dialect_arg(name)
