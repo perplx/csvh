@@ -256,16 +256,19 @@ def parse_args():
     output_dialect_group.add_argument("--output-quotechar", metavar="C", help="quotechar for the output Dialect")
     output_dialect_group.add_argument("--output-escapechar", metavar="C", help="escapechar for the output Dialect")
 
-    prolog_group = arg_parser.add_mutually_exclusive_group()
-    prolog_group.add_argument(
+    # prolog
+    prolog_group = arg_parser.add_argument_group("prolog")
+    prolog_excl_group = prolog_group.add_mutually_exclusive_group()
+    prolog_excl_group.add_argument(
         "--keep-prolog", type=int, default=0, metavar="N",
         help="number of header lines to skip, they will be reproduced in the output"
     )
-    prolog_group.add_argument(
+    prolog_excl_group.add_argument(
         "--skip-prolog", type=int, default=0, metavar="N",
-        help="number of header lines to skip, they will be omitted in the output"
+        help="number of header lines to skip, they will be omitted from the output"
     )
 
+    # filter
     filter_group = arg_parser.add_argument_group("filter")
     filter_group.add_argument(
         "--keep-cols", type=str, nargs="+", metavar="C", help="list of column-names to keep, in the order to be kept"
