@@ -339,7 +339,7 @@ def main():
         # prolog
         args.keep_prolog,
         args.skip_prolog,
-        # filer columns
+        # filter columns
         args.keep_cols,
         args.skip_cols,
         # filter rows
